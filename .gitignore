@@ -15,3 +15,6 @@ crash.*.log
 
 # Packaged application code (rebuilt before each deploy)
 app.zip
+
+# macOS
+.DS_Store
