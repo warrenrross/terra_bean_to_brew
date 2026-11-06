@@ -25,7 +25,7 @@ terraform apply -var-file=environments/dev.tfvars
 | Provider auto-registration disabled via env var, not code | Keeps code identical to template |
 | Repo lives in `~/Education/DASC/Cloud Computing/` | User asked to move it there |
 | `location = denmarkeast` in both tfvars | Policy allows only francecentral, denmarkeast, mexicocentral, belgiumcentral, northcentralus. Probe 2026-11-06: denmarkeast + belgiumcentral have F1/B1 quota, northcentralus has 0, francecentral/mexicocentral throttled (unknown) |
-| Resource group stays `rg-beantobrew-<env>` | A `wross` owner prefix was tried (6893f60) then reverted (0b08ced) to keep the already-working dev group. Subscription is shared with other students, so a clash is possible; revisit before prod |
+| Resource group stays `rg-beantobrew-<env>` | A `wross` owner prefix was tried (6893f60) then reverted (0b08ced) to keep the already-working dev group. Subscription is shared with other students, but `beantobrew` is specific to this project (clashes seen were from generic names), so no owner prefix is needed, including for prod |
 | App served by a small `server.js` added at deploy time | Bean_to_Brew is pure static; zip (index.html, css, js, data + server.js + package.json) is built outside the app repo and pushed with `az webapp deploy --type zip` |
 | Dev SKU stays F1 | Guide convention; F1 works in denmarkeast |
 
