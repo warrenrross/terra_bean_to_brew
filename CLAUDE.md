@@ -24,24 +24,28 @@ terraform apply -var-file=environments/dev.tfvars
 | Guide template kept as written (Node 22 Linux web app) | Convention required; app is static HTML/JS, so serving it needs a small Node server or a stack change |
 | Provider auto-registration disabled via env var, not code | Keeps code identical to template |
 | Repo lives in `~/Education/DASC/Cloud Computing/` | User asked to move it there |
-| `location = northcentralus` in both tfvars | Subscription policy allows only francecentral, denmarkeast, mexicocentral, belgiumcentral, northcentralus; closest to Arkansas. User chose to stay here for now |
-| Dev SKU stays F1 | Guide convention; B1 was tried and also has 0 quota, so reverted |
+| `location = denmarkeast` in both tfvars | Policy allows only francecentral, denmarkeast, mexicocentral, belgiumcentral, northcentralus. Probe 2026-11-06: denmarkeast + belgiumcentral have F1/B1 quota, northcentralus has 0, francecentral/mexicocentral throttled (unknown) |
+| Resource group stays `rg-beantobrew-<env>` | A `wross` owner prefix was tried (6893f60) then reverted (0b08ced) to keep the already-working dev group. Subscription is shared with other students, so a clash is possible; revisit before prod |
+| App served by a small `server.js` added at deploy time | Bean_to_Brew is pure static; zip (index.html, css, js, data + server.js + package.json) is built outside the app repo and pushed with `az webapp deploy --type zip` |
+| Dev SKU stays F1 | Guide convention; F1 works in denmarkeast |
 
 ## Known Issues
 | Issue | Status | Notes |
 |-------|--------|-------|
-| App Service plan fails: 401 "additional quota", F1 and B1 limit = 0 in `northcentralus` | OPEN | `az quota create` returns `ResourceNotAvailableForOffer` (Students offer can't self-raise). Message to instructor drafted in `current_status.md` |
-| Dev partially applied | OPEN | 4 of 6 resources exist in `rg-beantobrew-dev` (RG, Log Analytics, App Insights, storage `stbeantobrewdevby15e`). Plan + web app missing; state matches Azure |
-| App code not deployed | OPEN | Needs web app (or storage static-website fallback) first |
-| Old UITS-VDI subscription 403 | RESOLVED | Superseded by the Azure for Students subscription |
+| App Service quota 0 in `northcentralus` | RESOLVED | Moved to `denmarkeast`, where F1 works |
+| Azure PIM: Contributor must be activated | WATCH | Role is eligible, not permanent. `AuthorizationFailed` on everything = activate in portal (PIM > My roles > Azure resources), then `az logout && az login` |
+| Flaky 404s on reads in denmarkeast | WATCH | Terraform plan/import intermittently reports resources "deleted" or 404s. Retry; confirm with `az resource list` before applying |
+| Dev web app imported into state; pending in-place change | OPEN | `terraform apply` will set the App Insights connection string app setting (harmless). Run it, then plan should be empty |
+| App Insights Smart Detection action group | WATCH | Auto-created, not in Terraform, stalled a resource group delete once; `az monitor action-group delete` unblocked it |
+| Prod environment | NOT STARTED | `terraform workspace select prod` then apply with `environments/prod.tfvars` (B1, also has quota in denmarkeast) |
 
 ## Pending Tasks
-1. Send the instructor message in `current_status.md`; wait for quota or a region/SKU that has it
-2. Optional meanwhile: probe the other allowed regions for F1/B1 quota (region change recreates the 4 empty resources); fallback is storage static-website hosting
-3. Once quota exists: `terraform apply` for dev, deploy Bean to Brew files, promote to prod, tear down when done
+1. `terraform apply -var-file=environments/dev.tfvars -auto-approve` (run by the user; Claude's auto mode blocks it) to clear the one pending change
+2. Promote to prod, then tear down when done
 
 ## Session History
 | Date | Work Done |
 |------|-----------|
 | 2026-10-21 | Scaffolded repo from guide, pushed to github.com/warrenrross/terra_bean_to_brew, moved to Cloud Computing dir, installed az + terraform, signed in, dev plan OK (7 to add), apply blocked by 403 |
 | 2026-11-02 | Switched to instructor's Azure for Students sub, set region to northcentralus (policy), partial dev apply (4/6), blocked by 0 F1/B1 quota, quota request rejected by offer, wrote `current_status.md` with instructor message |
+| 2026-11-06 | Role was PIM-eligible (reactivated, re-logged in), probed all 5 regions, moved to denmarkeast, dev applied (state repaired by import + untaint after connection reset), tried and reverted wross RG prefix, deployed Bean to Brew: https://app-beantobrew-dev-by15e.azurewebsites.net |
