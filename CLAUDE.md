@@ -35,13 +35,15 @@ terraform apply -var-file=environments/dev.tfvars
 | App Service quota 0 in `northcentralus` | RESOLVED | Moved to `denmarkeast`, where F1 works |
 | Azure PIM: Contributor must be activated | WATCH | Role is eligible, not permanent. `AuthorizationFailed` on everything = activate in portal (PIM > My roles > Azure resources), then `az logout && az login` |
 | Flaky 404s on reads in denmarkeast | WATCH | Terraform plan/import intermittently reports resources "deleted" or 404s. Retry; confirm with `az resource list` before applying |
-| Dev web app imported into state; pending in-place change | OPEN | `terraform apply` will set the App Insights connection string app setting (harmless). Run it, then plan should be empty |
+| Dev web app imported into state; pending in-place change | MOOT | Was one harmless App Insights connection-string change; superseded by teardown |
+| `AzureInfo/` screenshots untracked | OPEN | Portal screenshots (PIM roles, subscription list) show account/subscription info; deliberately not committed. Delete or gitignore |
 | App Insights Smart Detection action group | WATCH | Auto-created, not in Terraform, stalled a resource group delete once; `az monitor action-group delete` unblocked it |
-| Prod environment | DONE | Applied 7/7 in `denmarkeast` (B1, workspace `prod`), site deployed: https://app-beantobrew-prod-2i3bb.azurewebsites.net |
+| Dev + prod environments | TEARDOWN PENDING | Both were applied and deployed (dev `app-beantobrew-dev-by15e`, prod `app-beantobrew-prod-2i3bb`, all pages 200). User asked to take everything down 2026-11-06; Claude's auto mode blocked `terraform destroy -auto-approve` ("Blind Apply"); destroy plans (7 each) were shown and the user runs the destroys |
 
 ## Pending Tasks
-1. `terraform apply -var-file=environments/dev.tfvars -auto-approve` (run by the user; Claude's auto mode blocks it) to clear the one pending change
-2. Tear down dev and prod when the course is done (`terraform workspace select <env>` then `terraform destroy -var-file=environments/<env>.tfvars`); prod B1 is paid
+1. User runs the teardown: `terraform workspace select dev` + `terraform destroy -var-file=environments/dev.tfvars -auto-approve`, then the same for `prod` (7 resources each). Prod B1 is paid, so do not leave it running. If a group delete stalls, delete the `Application Insights Smart Detection` action group with `az monitor action-group delete`
+2. After teardown, confirm `az group list` shows no `rg-beantobrew-*` and mark teardown DONE here
+3. Optional: delete or gitignore `AzureInfo/`; redeploy later from the repo with the zip recipe above
 
 ## Session History
 | Date | Work Done |
@@ -50,3 +52,4 @@ terraform apply -var-file=environments/dev.tfvars
 | 2026-11-02 | Switched to instructor's Azure for Students sub, set region to northcentralus (policy), partial dev apply (4/6), blocked by 0 F1/B1 quota, quota request rejected by offer, wrote `current_status.md` with instructor message |
 | 2026-11-06 | Role was PIM-eligible (reactivated, re-logged in), probed all 5 regions, moved to denmarkeast, dev applied (state repaired by import + untaint after connection reset), tried and reverted wross RG prefix, deployed Bean to Brew: https://app-beantobrew-dev-by15e.azurewebsites.net |
 | 2026-11-06 (later) | Applied prod (7 resources), deployed same zip, both sites return 200 with Bean to Brew content |
+| 2026-11-06 (end) | Fixed 404 nav (deploy zip had omitted pages/ and assets/), asked to take everything down: destroy plans shown (7+7), destroys left to the user because auto mode blocks blind applies; wrap-up |
