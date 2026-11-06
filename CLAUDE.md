@@ -36,14 +36,14 @@ terraform apply -var-file=environments/dev.tfvars
 | Azure PIM: Contributor must be activated | WATCH | Role is eligible, not permanent. `AuthorizationFailed` on everything = activate in portal (PIM > My roles > Azure resources), then `az logout && az login` |
 | Flaky 404s on reads in denmarkeast | WATCH | Terraform plan/import intermittently reports resources "deleted" or 404s. Retry; confirm with `az resource list` before applying |
 | Dev web app imported into state; pending in-place change | MOOT | Was one harmless App Insights connection-string change; superseded by teardown |
-| `AzureInfo/` screenshots untracked | OPEN | Portal screenshots (PIM roles, subscription list) show account/subscription info; deliberately not committed. Delete or gitignore |
+| `AzureInfo/` screenshots | RESOLVED | Portal screenshots (PIM roles, subscription list) show account/subscription info; now gitignored |
 | App Insights Smart Detection action group | WATCH | Auto-created, not in Terraform, stalled a resource group delete once; `az monitor action-group delete` unblocked it |
 | Dev + prod environments | TEARDOWN PENDING | Both were applied and deployed (dev `app-beantobrew-dev-by15e`, prod `app-beantobrew-prod-2i3bb`, all pages 200). User asked to take everything down 2026-11-06; Claude's auto mode blocked `terraform destroy -auto-approve` ("Blind Apply"); destroy plans (7 each) were shown and the user runs the destroys |
 
 ## Pending Tasks
 1. User runs the teardown: `terraform workspace select dev` + `terraform destroy -var-file=environments/dev.tfvars -auto-approve`, then the same for `prod` (7 resources each). Prod B1 is paid, so do not leave it running. If a group delete stalls, delete the `Application Insights Smart Detection` action group with `az monitor action-group delete`
 2. After teardown, confirm `az group list` shows no `rg-beantobrew-*` and mark teardown DONE here
-3. Optional: delete or gitignore `AzureInfo/`; redeploy later from the repo with the zip recipe above
+3. Optional: redeploy later from the repo with the zip recipe above
 
 ## Session History
 | Date | Work Done |
