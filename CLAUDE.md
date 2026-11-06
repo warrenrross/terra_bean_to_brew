@@ -38,12 +38,10 @@ terraform apply -var-file=environments/dev.tfvars
 | Dev web app imported into state; pending in-place change | MOOT | Was one harmless App Insights connection-string change; superseded by teardown |
 | `AzureInfo/` screenshots | RESOLVED | Portal screenshots (PIM roles, subscription list) show account/subscription info; now gitignored |
 | App Insights Smart Detection action group | WATCH | Auto-created, not in Terraform, stalled a resource group delete once; `az monitor action-group delete` unblocked it |
-| Dev + prod environments | TEARDOWN PENDING | Both were applied and deployed (dev `app-beantobrew-dev-by15e`, prod `app-beantobrew-prod-2i3bb`, all pages 200). User asked to take everything down 2026-11-06; Claude's auto mode blocked `terraform destroy -auto-approve` ("Blind Apply"); destroy plans (7 each) were shown and the user runs the destroys |
+| Dev + prod environments | TORN DOWN | Both applied and deployed 2026-11-06 (all pages 200), then destroyed. User manually verified in the portal that everything is gone; Claude could not check `az group list` (PIM role had expired). Terraform `dev` state may still list `azurerm_resource_group.rg`; if so run `terraform destroy` in `dev` or `terraform state rm azurerm_resource_group.rg` |
 
 ## Pending Tasks
-1. User runs the teardown: `terraform workspace select dev` + `terraform destroy -var-file=environments/dev.tfvars -auto-approve`, then the same for `prod` (7 resources each). Prod B1 is paid, so do not leave it running. If a group delete stalls, delete the `Application Insights Smart Detection` action group with `az monitor action-group delete`
-2. After teardown, confirm `az group list` shows no `rg-beantobrew-*` and mark teardown DONE here
-3. Optional: redeploy later from the repo with the zip recipe above
+None. Project complete. To redeploy: `terraform workspace select <env>`, `terraform apply -var-file=environments/<env>.tfvars`, then deploy the site with `skills/zip-deploy-static-site-azure/` (activate the PIM role first).
 
 ## Session History
 | Date | Work Done |
@@ -53,3 +51,4 @@ terraform apply -var-file=environments/dev.tfvars
 | 2026-11-06 | Role was PIM-eligible (reactivated, re-logged in), probed all 5 regions, moved to denmarkeast, dev applied (state repaired by import + untaint after connection reset), tried and reverted wross RG prefix, deployed Bean to Brew: https://app-beantobrew-dev-by15e.azurewebsites.net |
 | 2026-11-06 (later) | Applied prod (7 resources), deployed same zip, both sites return 200 with Bean to Brew content |
 | 2026-11-06 (end) | Fixed 404 nav (deploy zip had omitted pages/ and assets/), asked to take everything down: destroy plans shown (7+7), destroys left to the user because auto mode blocks blind applies; wrap-up |
+| 2026-11-06 (final) | Added `skills/zip-deploy-static-site-azure/` skill; dev and prod destroyed, teardown verified manually by the user; project complete |
