@@ -9,17 +9,6 @@ variable "project" {
   }
 }
 
-variable "owner" {
-  description = "Owner tag put in the resource group name so students sharing a subscription do not clash."
-  type        = string
-  default     = "wross"
-
-  validation {
-    condition     = can(regex("^[a-z0-9]{2,10}$", var.owner))
-    error_message = "owner must be 2-10 lowercase letters or numbers."
-  }
-}
-
 variable "environment" {
   description = "Environment name. Must match the current workspace (dev or prod)."
   type        = string
