@@ -27,7 +27,7 @@ locals {
 # ---------------------------------------------------------------------------
 
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-${local.name}"
+  name     = "rg-${var.owner}-${local.name}"
   location = var.location
   tags     = local.tags
 
