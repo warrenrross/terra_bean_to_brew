@@ -37,11 +37,11 @@ terraform apply -var-file=environments/dev.tfvars
 | Flaky 404s on reads in denmarkeast | WATCH | Terraform plan/import intermittently reports resources "deleted" or 404s. Retry; confirm with `az resource list` before applying |
 | Dev web app imported into state; pending in-place change | OPEN | `terraform apply` will set the App Insights connection string app setting (harmless). Run it, then plan should be empty |
 | App Insights Smart Detection action group | WATCH | Auto-created, not in Terraform, stalled a resource group delete once; `az monitor action-group delete` unblocked it |
-| Prod environment | NOT STARTED | `terraform workspace select prod` then apply with `environments/prod.tfvars` (B1, also has quota in denmarkeast) |
+| Prod environment | DONE | Applied 7/7 in `denmarkeast` (B1, workspace `prod`), site deployed: https://app-beantobrew-prod-2i3bb.azurewebsites.net |
 
 ## Pending Tasks
 1. `terraform apply -var-file=environments/dev.tfvars -auto-approve` (run by the user; Claude's auto mode blocks it) to clear the one pending change
-2. Promote to prod, then tear down when done
+2. Tear down dev and prod when the course is done (`terraform workspace select <env>` then `terraform destroy -var-file=environments/<env>.tfvars`); prod B1 is paid
 
 ## Session History
 | Date | Work Done |
@@ -49,3 +49,4 @@ terraform apply -var-file=environments/dev.tfvars
 | 2026-10-21 | Scaffolded repo from guide, pushed to github.com/warrenrross/terra_bean_to_brew, moved to Cloud Computing dir, installed az + terraform, signed in, dev plan OK (7 to add), apply blocked by 403 |
 | 2026-11-02 | Switched to instructor's Azure for Students sub, set region to northcentralus (policy), partial dev apply (4/6), blocked by 0 F1/B1 quota, quota request rejected by offer, wrote `current_status.md` with instructor message |
 | 2026-11-06 | Role was PIM-eligible (reactivated, re-logged in), probed all 5 regions, moved to denmarkeast, dev applied (state repaired by import + untaint after connection reset), tried and reverted wross RG prefix, deployed Bean to Brew: https://app-beantobrew-dev-by15e.azurewebsites.net |
+| 2026-11-06 (later) | Applied prod (7 resources), deployed same zip, both sites return 200 with Bean to Brew content |
