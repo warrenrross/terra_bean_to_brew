@@ -53,3 +53,13 @@ Bean to Brew is a static HTML/CSS/JS site. The web app created here is a Linux A
 ```bash
 terraform destroy -var-file=environments/<env>.tfvars
 ```
+
+## Deploying the site: Claude Code skill
+
+`skills/zip-deploy-static-site-azure/` is a reusable Claude Code skill that packages a static site (like Bean to Brew), zip-deploys it to the Azure Node web app this Terraform creates, and checks every link over HTTP. Copy the folder to `~/.claude/skills/` to use it. Its scripts also run on their own:
+
+```bash
+bash skills/zip-deploy-static-site-azure/scripts/build_zip.sh <site-repo> site.zip
+az webapp deploy -g <resource-group> -n <web-app-name> --src-path site.zip --type zip --clean true
+python3 skills/zip-deploy-static-site-azure/scripts/check_links.py <site-repo> --base-url https://<web-app-name>.azurewebsites.net
+```
